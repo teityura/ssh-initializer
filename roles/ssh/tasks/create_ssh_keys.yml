@@ -1,0 +1,14 @@
+- name: Generate ssh key
+  user:
+    name: "{{ ansible_env.USER }}"
+    generate_ssh_key: true
+    ssh_key_file: "{{ playbook_dir }}/.ssh/{{ item.host_name }}.id_rsa"
+    ssh_key_bits: 4096
+    state: present
+  with_items: "{{ hosts_csv.list }}"
+
+- name: Set permission
+  file:
+    path: "{{ playbook_dir }}/.ssh/{{ item.host_name }}.id_rsa"
+    mode: 0600
+  with_items: "{{ hosts_csv.list }}"

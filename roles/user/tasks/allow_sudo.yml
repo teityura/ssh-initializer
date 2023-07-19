@@ -1,0 +1,6 @@
+- name: Allow sudo command
+  lineinfile:
+    create: true
+    dest: "/etc/sudoers.d/{{ ansible_user }}"
+    line: "{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL"
+    validate: "visudo -cf %s"

@@ -1,0 +1,2 @@
+- import_tasks: read_csv.yml
+- import_tasks: create_inventory.yml

@@ -1,0 +1,6 @@
+- name: Generate inventory
+  template:
+    src: hosts.j2
+    dest: "{{ playbook_dir }}/hosts"
+    mode: 0644
+    # backup: true

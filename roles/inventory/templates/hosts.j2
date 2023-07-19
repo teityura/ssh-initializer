@@ -1,0 +1,29 @@
+{%- set groups = [] -%}
+{%- for h in hosts_csv.list -%}
+    {%- if h.group_name not in groups -%}
+        {%- set _ = groups.append(h.group_name) -%}
+    {%- endif -%}
+{%- endfor -%}
+[all:children]
+{% for group in groups %}
+{{ group }}
+{% endfor %}
+{{-'\n'-}}
+{% for group in groups %}
+[{{ group }}]
+{% for h in hosts_csv.list %}
+    {%- if h.group_name == group %}
+        {%- if (h.ssh_pass and h.ssh_pass != '') and (h.become_pass and h.become_pass != '') %}
+            {{- h.host_name }} ansible_user={{ h.ssh_user }} ansible_password={{ h.ssh_pass }} ansible_become_password={{ h.become_pass }}
+        {%- elif (h.ssh_pass and h.ssh_pass != '') %}
+            {{- h.host_name }} ansible_user={{ h.ssh_user }} ansible_password={{ h.ssh_pass }}
+        {%- elif (h.become_pass and h.become_pass != '') %}
+            {{- h.host_name }} ansible_user={{ h.ssh_user }} ansible_password={{ h.become_pass }}
+        {%- else %}
+            {{- h.host_name }}
+        {%- endif %}
+        {{-'\n'-}}
+    {%- endif %}
+{% endfor %}
+{{-'\n'-}}
+{% endfor %}

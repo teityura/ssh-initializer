@@ -1,0 +1,4 @@
+.ssh/
+logs/
+hosts*
+!/roles/inventory/templates/hosts.j2

@@ -1,0 +1,10 @@
+- name: Allow PermitRootLogin
+  lineinfile:
+    create: true
+    dest: /etc/ssh/sshd_config.d/PermitRootLogin.conf
+    line: PermitRootLogin yes
+
+- name: reload sshd
+  systemd:
+    name: sshd
+    state: reloaded

@@ -1,0 +1,3 @@
+- import_tasks: add_authorized_key.yml
+- import_tasks: allow_sudo.yml
+- import_tasks: allow_root_login.yml

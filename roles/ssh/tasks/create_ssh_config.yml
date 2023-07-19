@@ -1,0 +1,6 @@
+- name: Generate ssh config
+  template:
+    src: ssh_config.j2
+    dest: "{{ playbook_dir }}/.ssh/config"
+    mode: 0600
+    # backup: true

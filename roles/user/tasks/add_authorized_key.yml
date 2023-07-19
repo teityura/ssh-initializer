@@ -1,0 +1,13 @@
+- name: Add root user to users_list
+  set_fact:
+    users_list: "{{ [ansible_user] + ['root'] if ansible_user != 'root' else ['root'] }}"
+
+- name: Print users_list
+  debug:
+    var: users_list
+
+- name: Set authorized_key
+  authorized_key:
+    user: "{{ item }}"
+    key: "{{ lookup('file', playbook_dir + '/.ssh/' + inventory_hostname + '.id_rsa.pub') }}"
+  loop: "{{ users_list }}"

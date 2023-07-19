@@ -1,0 +1,13 @@
+- name: Check ansible version
+  set_fact:
+    __ansible_28_or_higher: "{{ ansible_version.full is version_compare('2.8', '>=') }}"
+
+- name: Fail if ansible version is too low
+  fail:
+    msg: Must be run on ansible 2.8 or higher
+  when: not __ansible_28_or_higher
+
+- name: read csv data
+  read_csv:
+    path: "{{ playbook_dir }}/hosts.csv"
+  register: hosts_csv
