@@ -1,0 +1,6 @@
+host_name,con_name,ssh_user,ssh_pass,become_pass,group_name
+jump,172.16.0.1,ubuntu,jump_ssh_pass,jump_become_pass,other
+web1,172.16.1.1,ubuntu,web1_ssh_pass,web1_become_pass,web
+web2,172.16.1.2,ubuntu,web2_ssh_pass,web2_become_pass,web
+db1,172.16.2.1,db_user,db1_ssh_pass,db1_become_pass,db
+db2,172.16.2.2,db_user,db2_ssh_pass,db2_become_pass,db

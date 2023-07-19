@@ -1,4 +1,5 @@
 .ssh/
 logs/
 hosts*
-!/roles/inventory/templates/hosts.j2
+!hosts.csv.sample
+!roles/inventory/templates/hosts.j2
