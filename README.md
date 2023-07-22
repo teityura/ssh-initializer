@@ -26,6 +26,14 @@ authorized_keys, パスなしsudo, rootログイン を許可します
 
 ## 使い方
 
+- clone する
+
+```
+mkdir -p <project_dir>
+cd <project_dir>/
+git clone https://github.com/teityura/ssh-initializer.git <project_name>
+```
+
 - hosts.csv を作成する
 
 ```
@@ -167,10 +175,10 @@ ssh 接続し、root ユーザに昇格して、下記を実行する
 鍵を生成した後に、上書きすればOK
 
 ```
-cd <cloned_project_dir>/
+cd <project_dir>/<project_name>
 ansible-playbook -v setup.yml -t ssh,inventory
-\cp ~/.ssh/hoge_rsa <cloned_project_dir>/.ssh/jump.id_rsa
-\cp ~/.ssh/hoge_rsa.pub <cloned_project_dir>/.ssh/jump.id_rsa.pub
+\cp ~/.ssh/hoge_rsa <project_dir>/<project_name>/.ssh/jump.id_rsa
+\cp ~/.ssh/hoge_rsa.pub <project_dir>/<project_name>/.ssh/jump.id_rsa.pub
 ssh -F .ssh/config jump
 ansible -m ping jump
 ansible-playbook -v setup.yml -t user
@@ -178,13 +186,13 @@ ansible-playbook -v setup.yml -t user
 
 ### ~/.ssh/config を Include でファイル分割する
 
-毎回 ssh -F <cloned_project_dir>/.ssh/config するのは面倒
+毎回 ssh -F <project_dir>/<project_name>/.ssh/config するのは面倒
 
 ~/.ssh/config で Include するようにしたら、
 どこのディレクトリにいても ssh 可能になる
 
 ```
 cat ~/.ssh/config | grep '^Include' || sed -i '1i Include ~/.ssh/conf.d/**/*\n' ~/.ssh/config
-mkdir -p ~/.ssh/conf.d/ssh-initializer
-ln -s <cloned_project_dir>/.ssh/config ~/.ssh/conf.d/<project_dir_name>/
+mkdir -p ~/.ssh/conf.d/<project_name>
+ln -s <project_dir>/<project_name>/.ssh/config ~/.ssh/conf.d/<project_name>/
 ```
