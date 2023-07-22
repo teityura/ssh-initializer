@@ -36,7 +36,9 @@ vim hosts.csv
 
 ```
 ansible-playbook setup.yml -t ssh,inventory
-ansible-playbook setup.yml -t users
+ansible-playbook setup.yml -t user
+ansible -m ping ssh-init-test
+ssh -F .ssh/config ssh-init-test
 ```
 
 - プレイブックを実行すると、
@@ -165,7 +167,6 @@ ssh 接続し、root ユーザに昇格して、下記を実行する
 鍵を生成した後に、上書きすればOK
 
 ```
-# <cloned_project_dir> は clone したディレクトリのパスに読み替えてください
 cd <cloned_project_dir>/
 ansible-playbook -v setup.yml -t ssh,inventory
 \cp ~/.ssh/hoge_rsa <cloned_project_dir>/.ssh/jump.id_rsa
@@ -183,8 +184,7 @@ ansible-playbook -v setup.yml -t user
 どこのディレクトリにいても ssh 可能になる
 
 ```
-# <cloned_project_dir> は clone したディレクトリのパスに読み替えてください
 cat ~/.ssh/config | grep '^Include' || sed -i '1i Include ~/.ssh/conf.d/**/*\n' ~/.ssh/config
 mkdir -p ~/.ssh/conf.d/ssh-initializer
-ln -s <cloned_project_dir>/.ssh/config ~/.ssh/conf.d/ssh-initializer/
+ln -s <cloned_project_dir>/.ssh/config ~/.ssh/conf.d/<project_dir_name>/
 ```
