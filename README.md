@@ -32,6 +32,7 @@ authorized_keys, パスなしsudo, rootログイン を許可します
 mkdir -p <project_dir>
 cd <project_dir>/
 git clone https://github.com/teityura/ssh-initializer.git <project_name>
+cd ~/repos/<project_name>/
 ```
 
 - hosts.csv を作成する
@@ -45,8 +46,8 @@ vim hosts.csv
 ```
 ansible-playbook setup.yml -t ssh,inventory
 ansible-playbook setup.yml -t user
-ansible -m ping ssh-init-test
-ssh -F .ssh/config ssh-init-test
+ansible -m ping jump
+ssh -F .ssh/config jump
 ```
 
 - プレイブックを実行すると、
