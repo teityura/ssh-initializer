@@ -32,7 +32,7 @@ authorized_keys, パスなしsudo, rootログイン を許可します
 mkdir -p <project_dir>
 cd <project_dir>/
 git clone https://github.com/teityura/ssh-initializer.git <project_name>
-cd ~/repos/<project_name>/
+cd <project_name>/
 ```
 
 - hosts.csv を作成する
