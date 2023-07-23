@@ -9,6 +9,12 @@ VMに初回接続するときなどに、
 
 という、諸々の作業を一発で完了させるプレイブックです
 
+以下のコマンド例は、
+プロジェクトディレクトリ: <project_dir>
+プロジェクト名: <project_name>
+ホスト名: jump
+をセットアップする場合の説明になります
+
 ## 概要
 
 > roles/ssh
@@ -52,13 +58,18 @@ ssh -F .ssh/config jump
 
 - プレイブックを実行すると、
   - 鍵とconfigが生成される ... roles/ssh
-  - hosts.ini が生成される ... roles/inventory
-  - hosts.ini が生成される ... roles/users
+  - hosts が生成される ... roles/inventory
+  - hosts が生成される ... roles/users
 
 ### hosts.csv
 
-- ホスト名, 接続名, sshパスワード, rootパスワード, sshユーザ, グループ名 の順に記載する
-- ssh_pass, become_pass は省略可能
+ホスト名, 接続名, sshユーザ, sshパスワード, rootパスワード, グループ名 の順に記載する
+
+| 変数 | host_name | con_name | ssh_user | ssh_pass | become_pass | group_name |
+| --- | --- | --- | --- | --- | --- | --- |
+| 説明 | ホスト名 | 接続名 | sshユーザ | sshパスワード | rootパスワード | グループ名 |
+| 必須引数 | o | o | o | - | - | o |
+| 任意引数 | - | - | - | o | o | - |
 
 ``` csv
 host_name,con_name,ssh_user,ssh_pass,become_pass,group_name
@@ -130,8 +141,8 @@ Host db2
 
 ### roles/inventory
 
-- hosts.ini は下記のように生成される
-  - 1ホスト は 1グループにだけ追加できる
+- hosts は下記のように生成される
+- 1ホスト は 1グループにだけ追加できる
 
 ``` ini:hosts
 [all:children]
@@ -176,7 +187,7 @@ ssh 接続し、root ユーザに昇格して、下記を実行する
 鍵を生成した後に、上書きすればOK
 
 ```
-cd <project_dir>/<project_name>
+cd <project_dir>/<project_name>/
 ansible-playbook -v setup.yml -t ssh,inventory
 \cp ~/.ssh/hoge_rsa <project_dir>/<project_name>/.ssh/jump.id_rsa
 \cp ~/.ssh/hoge_rsa.pub <project_dir>/<project_name>/.ssh/jump.id_rsa.pub
