@@ -8,5 +8,5 @@ Host *
 Host {{ h.host_name }}
   Hostname {{ h.con_name }}
   User {{ h.ssh_user }}
-  IdentityFile .ssh/{{ h.host_name }}.id_rsa
+  IdentityFile {{ playbook_dir }}/.ssh/{{ h.host_name }}.id_rsa
 {% endfor %}
