@@ -206,6 +206,15 @@ ansible -m ping jump
 ansible-playbook -v setup.yml -t user,lvm
 ```
 
+### lvmスナップショット取得時の状態に戻す
+
+lvmスナップショットを取得時の状態に戻り、  
+ssh-initializer のあとに実施した `全ての作業` が消えます
+
+```
+ansible-playbook -v merge_snapshot.yml -l jump
+```
+
 ### ~/.ssh/config を Include でファイル分割する
 
 毎回 ssh -F <project_dir>/<project_name>/.ssh/config するのは面倒
