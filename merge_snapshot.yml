@@ -1,0 +1,15 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  become_method: sudo
+  remote_user: ansible_user
+  tasks:
+    - name: Include merge_snapshot tasks from lvm role
+      include_role:
+        name: lvm
+        tasks_from: merge_snapshot
+
+    - name: Include create_snapshot tasks from lvm role
+      include_role:
+        name: lvm
+        tasks_from: create_snapshot

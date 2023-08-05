@@ -1,0 +1,20 @@
+- name: "[Ubuntu] Merge snapshot tasks"
+  block:
+    - name: Merge the existing snapshot into the original logical volume
+      command: lvconvert --merge ubuntu-vg/{{ snapshot_name }}
+
+    - name: Reboot the system after merging the snapshot
+      reboot:
+        reboot_timeout: 300
+
+    - name: Check for remaining device mapper entries related to the snapshot
+      command: dmsetup info
+      register: result_dmsetup
+
+    - name: Reboot again if any snapshot-related entries are found
+      vars:
+        dm_name: "{{ snapshot_name | replace('-', '--') }}"
+      reboot:
+        reboot_timeout: 300
+      when: dm_name in result_dmsetup.stdout
+  when: ansible_distribution == 'Ubuntu'

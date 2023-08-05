@@ -8,3 +8,4 @@
   systemd:
     name: sshd
     state: reloaded
+  changed_when: false

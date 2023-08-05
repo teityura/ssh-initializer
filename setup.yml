@@ -10,10 +10,13 @@
         # - never  # 手動で hosts を作成する場合は never タグを付ける
 
 - hosts: all
-  gather_facts: false
+  gather_facts: true
   become: true
   become_method: sudo
   remote_user: ansible_user
   roles:
     - role: user
       tags: user
+
+    - role: lvm
+      tags: lvm

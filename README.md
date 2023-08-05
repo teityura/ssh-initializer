@@ -6,6 +6,7 @@ VMに初回接続するときなどに、
 2. ssh-copy-id | authorized_keysの追記 して、
 3. sshで rootログインできるようにして、
 4. 一般ユーザで パスなしsudoできるようにする
+5. lvmスナップショットを作成します
 
 という、諸々の作業を一発で完了させるプレイブックです
 
@@ -30,6 +31,10 @@ hosts.csv に記載した内容をもとに、
 
 authorized_keys, パスなしsudo, rootログイン を許可します
 
+> roles/lvm
+
+lvmスナップショットを作成します
+
 ## 使い方
 
 - clone する
@@ -50,16 +55,21 @@ vim hosts.csv
 - プレイブックを実行する
 
 ```
+# 一括実行
+# ansible-playbook setup.yml
+
+# 個別実行
 ansible-playbook setup.yml -t ssh,inventory
-ansible-playbook setup.yml -t user
 ansible -m ping jump
 ssh -F .ssh/config jump
+ansible-playbook setup.yml -t user,lvm
 ```
 
 - プレイブックを実行すると、
   - 鍵とconfigが生成される ... roles/ssh
   - hosts が生成される ... roles/inventory
   - hosts が生成される ... roles/users
+  - lvmスナップショット が作成される ... roles/lvm
 
 ### hosts.csv
 
@@ -193,7 +203,7 @@ ansible-playbook -v setup.yml -t ssh,inventory
 \cp ~/.ssh/hoge_rsa.pub <project_dir>/<project_name>/.ssh/jump.id_rsa.pub
 ssh -F .ssh/config jump
 ansible -m ping jump
-ansible-playbook -v setup.yml -t user
+ansible-playbook -v setup.yml -t user,lvm
 ```
 
 ### ~/.ssh/config を Include でファイル分割する

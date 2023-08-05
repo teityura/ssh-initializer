@@ -1,0 +1,19 @@
+- name: "[Ubuntu] Create snapshot tasks"
+  block:
+    - name: Check if the LVM snapshot already exists
+      shell: "lvs --noheadings -o lv_name ubuntu-vg | grep {{ snapshot_name }}"
+      register: result_grep
+      ignore_errors: true
+      changed_when: false
+
+    - name: Create LVM snapshot if it does not exist
+      lvol:
+        vg: ubuntu-vg
+        lv: ubuntu-lv
+        snapshot: "{{ snapshot_name }}"
+        size: 100%FREE
+      when: result_grep.rc != 0
+
+    - name: Display logical volumes
+      command: lvs
+  when: ansible_distribution == 'Ubuntu'
