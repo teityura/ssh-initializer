@@ -1,20 +1,47 @@
 - name: "[Ubuntu] Merge snapshot tasks"
   block:
     - name: Merge the existing snapshot into the original logical volume
-      command: lvconvert --merge ubuntu-vg/{{ snapshot_name }}
+      command: lvconvert --merge {{ vg_name }}/{{ snapshot_name }}
 
-    - name: Reboot the system after merging the snapshot
-      reboot:
-        reboot_timeout: 300
+    - name: Set device mapper name
+      set_fact:
+        dm_name: "{{ snapshot_name | replace('-', '--') }}"
 
-    - name: Check for remaining device mapper entries related to the snapshot
-      command: dmsetup info
+    - name: "(1st) Check device mapper status before reboot"
+      command: dmsetup status
       register: result_dmsetup
 
-    - name: Reboot again if any snapshot-related entries are found
-      vars:
-        dm_name: "{{ snapshot_name | replace('-', '--') }}"
+    - name: "(1st) Print dmsetup status before reboot"
+      debug:
+        var: result_dmsetup.stdout_lines
+
+    - name: Reboot the system if dm_name is found in result_dmsetup.stdout
       reboot:
         reboot_timeout: 300
+      when: dm_name in result_dmsetup.stdout
+
+    - name: "(2nd) Check device mapper status after reboot"
+      command: dmsetup status
+      register: result_dmsetup
+
+    - name: "(2nd) Print dmsetup status before after"
+      debug:
+        var: result_dmsetup.stdout_lines
+
+    - name: Activate lv if device mapper remains
+      command: lvchange -ay {{ vg_name }}/{{ lv_name }}
+      when: dm_name in result_dmsetup.stdout
+
+    - name: "(3rd) Check device mapper after activate"
+      command: dmsetup status
+      register: result_dmsetup
+
+    - name: "(3rd) Print dmsetup status after activate"
+      debug:
+        var: result_dmsetup.stdout_lines
+
+    - name: Fail if dm_name is found in result_dmsetup.stdout after activate
+      fail:
+        msg: "The device mapper {{ dm_name }} remains."
       when: dm_name in result_dmsetup.stdout
   when: ansible_distribution == 'Ubuntu'

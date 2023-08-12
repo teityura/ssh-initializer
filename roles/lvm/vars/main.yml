@@ -1,1 +1,3 @@
+vg_name: ubuntu-vg
+lv_name: ubuntu-lv
 snapshot_name: 01_os-installed

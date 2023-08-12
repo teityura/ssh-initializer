@@ -17,6 +17,3 @@
   roles:
     - role: user
       tags: user
-
-    - role: lvm
-      tags: lvm

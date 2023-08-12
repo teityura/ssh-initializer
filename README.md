@@ -1,12 +1,13 @@
 # ssh-initializer
 
+## setup-ssh.yml
+
 VMに初回接続するときなどに、
 
 1. ~/.ssh/config 書いて、
 2. ssh-copy-id | authorized_keysの追記 して、
 3. sshで rootログインできるようにして、
 4. 一般ユーザで パスなしsudoできるようにする
-5. lvmスナップショットを作成します
 
 という、諸々の作業を一発で完了させるプレイブックです
 
@@ -16,7 +17,20 @@ VMに初回接続するときなどに、
 ホスト名: jump
 をセットアップする場合の説明になります
 
-## 概要
+## setup-lvm.yml
+
+setup-ssh.yml 完了後のホストに対して、
+
+- スナップショットボリュームの作成
+- スナップショットボリュームのマージ
+
+が可能です
+
+とりあえず、OSインストール後に  
+ルートパーティションのスナップショットを取得しておけば、  
+構成変更のときなどに `コンソール作業不要` で すぐに初期化できるので、便利です
+
+## roles
 
 > roles/ssh
 
@@ -56,13 +70,13 @@ vim hosts.csv
 
 ```
 # 一括実行
-# ansible-playbook setup.yml
+# ansible-playbook setup_ssh.yml
 
 # 個別実行
-ansible-playbook setup.yml -t ssh,inventory
+ansible-playbook setup_ssh.yml -t ssh,inventory
 ansible -m ping jump
 ssh -F .ssh/config jump
-ansible-playbook setup.yml -t user,lvm
+ansible-playbook setup_ssh.yml -t user
 ```
 
 - プレイブックを実行すると、
@@ -176,7 +190,7 @@ db2 ansible_user=db_user ansible_password=db2_ssh_pass ansible_become_password=d
 
 ```
 # インベントリを作成せず、鍵だけ生成する
-ansible-playbook -v setup.yml -t ssh
+ansible-playbook -v setup_ssh.yml -t ssh
 
 # 手動で hosts を 作成, 編集する
 vim hosts
@@ -198,15 +212,25 @@ ssh 接続し、root ユーザに昇格して、下記を実行する
 
 ```
 cd <project_dir>/<project_name>/
-ansible-playbook -v setup.yml -t ssh,inventory
+ansible-playbook -v setup_ssh.yml -t ssh,inventory
 \cp ~/.ssh/hoge_rsa <project_dir>/<project_name>/.ssh/jump.id_rsa
 \cp ~/.ssh/hoge_rsa.pub <project_dir>/<project_name>/.ssh/jump.id_rsa.pub
 ssh -F .ssh/config jump
 ansible -m ping jump
-ansible-playbook -v setup.yml -t user,lvm
+ansible-playbook -v setup_ssh.yml -t user
 ```
 
-### lvmスナップショット取得時の状態に戻す
+### スナップショットボリュームの作成
+
+```
+vim roles/lvm/vars/main.yml
+ansible-playbook -v setup_lvm.yml -l jump
+```
+
+vg名: ubuntu-vg, lv名: ubuntu-lv じゃない場合は、  
+roles/lvm/vars/main.yml を編集してください
+
+### スナップショットボリュームのマージ
 
 lvmスナップショットを取得時の状態に戻り、  
 ssh-initializer のあとに実施した `全ての作業` が消えます
