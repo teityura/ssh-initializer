@@ -1,47 +1,34 @@
-- name: "[Ubuntu] Merge snapshot tasks"
-  block:
-    - name: Merge the existing snapshot into the original logical volume
-      command: lvconvert --merge {{ vg_name }}/{{ snapshot_name }}
+- name: Retrieve lvdisplay result before merging snapshot
+  command: lvdisplay /dev/{{ vg_name }}/{{ lv_name }}
+  register: result_lvdisplay
 
-    - name: Set device mapper name
-      set_fact:
-        dm_name: "{{ snapshot_name | replace('-', '--') }}"
+- name: Display lvdisplay result before merging snapshot
+  debug:
+    var: result_lvdisplay.stdout_lines
 
-    - name: "(1st) Check device mapper status before reboot"
-      command: dmsetup status
-      register: result_dmsetup
+- name: Merge existing snapshot into original logical volume
+  command: lvconvert --merge /dev/{{ vg_name }}/{{ snapshot_name }}
+  when: snapshot_name in result_lvdisplay.stdout
 
-    - name: "(1st) Print dmsetup status before reboot"
-      debug:
-        var: result_dmsetup.stdout_lines
+- name: Reboot system to activate merge
+  reboot:
+    reboot_timeout: 300
 
-    - name: Reboot the system if dm_name is found in result_dmsetup.stdout
-      reboot:
-        reboot_timeout: 300
-      when: dm_name in result_dmsetup.stdout
+- name: Activate original logical volume after reboot
+  command: lvchange -ay /dev/{{ vg_name }}/{{ lv_name }}
 
-    - name: "(2nd) Check device mapper status after reboot"
-      command: dmsetup status
-      register: result_dmsetup
+- name: Wait for snapshot to merge completely
+  shell: lvdisplay /dev/{{ vg_name }}/{{ lv_name }} | grep {{ snapshot_name }}
+  register: result_lvdisplay_grep
+  failed_when: false
+  until: result_lvdisplay_grep.rc != 0
+  retries: 360
+  delay: 10
 
-    - name: "(2nd) Print dmsetup status before after"
-      debug:
-        var: result_dmsetup.stdout_lines
+- name: Retrieve lvdisplay result after merging snapshot
+  command: lvdisplay /dev/{{ vg_name }}/{{ lv_name }}
+  register: result_lvdisplay
 
-    - name: Activate lv if device mapper remains
-      command: lvchange -ay {{ vg_name }}/{{ lv_name }}
-      when: dm_name in result_dmsetup.stdout
-
-    - name: "(3rd) Check device mapper after activate"
-      command: dmsetup status
-      register: result_dmsetup
-
-    - name: "(3rd) Print dmsetup status after activate"
-      debug:
-        var: result_dmsetup.stdout_lines
-
-    - name: Fail if dm_name is found in result_dmsetup.stdout after activate
-      fail:
-        msg: "The device mapper {{ dm_name }} remains."
-      when: dm_name in result_dmsetup.stdout
-  when: ansible_distribution == 'Ubuntu'
+- name: Display lvdisplay result after merging snapshot
+  debug:
+    var: result_lvdisplay.stdout_lines

@@ -1,22 +1,37 @@
-- name: "[Ubuntu] Create snapshot tasks"
-  block:
-    - name: "(1st) Check lvs before take snapshot"
-      command: lvs {{ vg_name }} -o lv_name,vg_name,attr,size,pool_lv,origin,data_percent,metadata_percent
-      register: result_lvs
+- name: Retrieve lvs result before taking snapshot
+  command: lvs {{ vg_name }} -o lv_name,vg_name,attr,size,pool_lv,origin,data_percent,metadata_percent
+  register: result_lvs
 
-    - name: "(1st) Print lvs before take snapshot"
-      debug:
-        var: result_lvs.stdout_lines
+- name: Display lvs result before taking snapshot
+  debug:
+    var: result_lvs.stdout_lines
 
-    - name: Create LVM snapshot if snapshot_name not in result_lvs.stdout
-      command: lvcreate -sl 100%ORIGIN -n {{ snapshot_name }} /dev/{{ vg_name }}/{{ lv_name }}
-      when: snapshot_name not in result_lvs.stdout
+- name: Retrieve lvdisplay result before taking snapshot
+  command: lvdisplay /dev/{{ vg_name }}/{{ lv_name }}
+  register: result_lvdisplay
 
-    - name: "(2nd) Check lvs after take snapshot"
-      command: lvs {{ vg_name }} -o lv_name,vg_name,attr,size,pool_lv,origin,data_percent,metadata_percent
-      register: result_lvs
+- name: Display lvdisplay result before taking snapshot
+  debug:
+    var: result_lvdisplay.stdout_lines
 
-    - name: "(2nd) Print lvs after take snapshot"
-      debug:
-        var: result_lvs.stdout_lines
-  when: ansible_distribution == 'Ubuntu'
+- name: Create snapshot volume if not already present
+  command: lvcreate -sl 100%ORIGIN -n {{ snapshot_name }} /dev/{{ vg_name }}/{{ lv_name }}
+  when:
+    - snapshot_name not in result_lvs.stdout
+    - snapshot_name not in result_lvdisplay.stdout
+
+- name: Retrieve lvdisplay result after taking snapshot
+  command: lvdisplay /dev/{{ vg_name }}/{{ lv_name }}
+  register: result_lvdisplay
+
+- name: Display lvdisplay result after taking snapshot
+  debug:
+    var: result_lvdisplay.stdout_lines
+
+- name: Retrieve lvs result after taking snapshot
+  command: lvs {{ vg_name }} -o lv_name,vg_name,attr,size,pool_lv,origin,data_percent,metadata_percent
+  register: result_lvs
+
+- name: Display lvs result after taking snapshot
+  debug:
+    var: result_lvs.stdout_lines
