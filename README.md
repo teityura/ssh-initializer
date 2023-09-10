@@ -1,6 +1,6 @@
 # ssh-initializer
 
-## setup-ssh.yml
+## setup_ssh.yml
 
 VMに初回接続するときなどに、
 
@@ -17,9 +17,9 @@ VMに初回接続するときなどに、
 ホスト名: jump
 をセットアップする場合の説明になります
 
-## setup-lvm.yml
+## setup_lvm.yml
 
-setup-ssh.yml 完了後のホストに対して、
+setup_ssh.yml 完了後のホストに対して、
 
 - スナップショットボリュームの作成
 - スナップショットボリュームのマージ
@@ -69,14 +69,17 @@ vim hosts.csv
 - プレイブックを実行する
 
 ```
-# 一括実行
-# ansible-playbook setup_ssh.yml
-
-# 個別実行
+# SSHキー&インベントリの作成
 ansible-playbook setup_ssh.yml -t ssh,inventory
+
+# パスなしsudo等の設定
+ansible-playbook setup_ssh.yml -t user
+
+# jumpのみ
+ansible-playbook setup_ssh.yml -t ssh,inventory
+ansible-playbook setup_ssh.yml -t user -l jump
 ansible -m ping jump
 ssh -F .ssh/config jump
-ansible-playbook setup_ssh.yml -t user
 ```
 
 - プレイブックを実行すると、
@@ -190,7 +193,7 @@ db2 ansible_user=db_user ansible_password=db2_ssh_pass ansible_become_password=d
 
 ```
 # インベントリを作成せず、鍵だけ生成する
-ansible-playbook -v setup_ssh.yml -t ssh
+ansible-playbook setup_ssh.yml -t ssh
 
 # 手動で hosts を 作成, 編集する
 vim hosts
@@ -212,19 +215,19 @@ ssh 接続し、root ユーザに昇格して、下記を実行する
 
 ```
 cd <project_dir>/<project_name>/
-ansible-playbook -v setup_ssh.yml -t ssh,inventory
+ansible-playbook setup_ssh.yml -t ssh,inventory
 \cp ~/.ssh/hoge_rsa <project_dir>/<project_name>/.ssh/jump.id_rsa
 \cp ~/.ssh/hoge_rsa.pub <project_dir>/<project_name>/.ssh/jump.id_rsa.pub
 ssh -F .ssh/config jump
 ansible -m ping jump
-ansible-playbook -v setup_ssh.yml -t user
+ansible-playbook setup_ssh.yml -t user
 ```
 
 ### スナップショットボリュームの作成
 
 ```
 vim roles/lvm/vars/main.yml
-ansible-playbook -v setup_lvm.yml -l jump
+ansible-playbook setup_lvm.yml -l jump
 ```
 
 vg名: ubuntu-vg, lv名: ubuntu-lv じゃない場合は、  
@@ -236,7 +239,7 @@ lvmスナップショットを取得時の状態に戻り、
 ssh-initializer のあとに実施した `全ての作業` が消えます
 
 ```
-ansible-playbook -v merge_snapshot.yml -l jump
+ansible-playbook merge_snapshot.yml -l jump
 ```
 
 ### ~/.ssh/config を Include でファイル分割する
