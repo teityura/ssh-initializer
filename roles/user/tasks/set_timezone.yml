@@ -1,0 +1,16 @@
+- name: Set timezone to Asia/Tokyo
+  timezone:
+    name: Asia/Tokyo
+  register: result_timezone
+
+- name: Set service facts
+  service_facts:
+
+- name: Restart cron if installed
+  systemd:
+    name: cron
+    state: restarted
+  when:
+    - result_timezone.changed
+    - "'cron.service' in services"
+    - services['cron.service'].state == 'running'
