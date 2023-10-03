@@ -1,10 +1,13 @@
 - name: Allow PermitRootLogin
-  lineinfile:
-    create: true
+  copy:
+    content: |
+      PermitRootLogin yes
+      PubkeyAuthentication yes
+      PasswordAuthentication no
     dest: /etc/ssh/sshd_config.d/PermitRootLogin.conf
-    line: PermitRootLogin yes
+    force: yes
 
-- name: reload sshd
+- name: Reload sshd
   systemd:
     name: sshd
     state: reloaded
