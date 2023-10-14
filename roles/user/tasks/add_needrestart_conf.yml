@@ -1,0 +1,21 @@
+- name: Check if needrestart is installed
+  package:
+    name: needrestart
+    state: present
+  register: package_check
+  ignore_errors: true
+
+- name: Find all .conf files in /etc/needrestart/conf.d
+  find:
+    paths: /etc/needrestart/conf.d
+    patterns: "*.conf"
+  register: conf_files
+  when: package_check is succeeded
+
+- name: Set needrestart configuration
+  copy:
+    content: |
+      $nrconf{kernelhints} = '0';
+      $nrconf{restart} = 'a';
+    dest: /etc/needrestart/conf.d/99_restart.conf
+  when: (package_check is succeeded) and (conf_files.matched == 0)
