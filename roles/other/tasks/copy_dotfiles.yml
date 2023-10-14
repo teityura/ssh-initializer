@@ -1,0 +1,19 @@
+- name: Ensure ~/repos directory exists
+  file:
+    path: "~/repos"
+    state: directory
+
+- name: Clone dotfiles repository
+  git:
+    repo: "https://github.com/teityura/dotfiles.git"
+    dest: "~/repos/dotfiles"
+
+- name: Execute backup script
+  command:
+    cmd: "./backup-default-dotfiles.sh"
+    chdir: "~/repos/dotfiles"
+
+- name: Execute copy script
+  command:
+    cmd: "./copy-dotfiles.sh"
+    chdir: "~/repos/dotfiles"
