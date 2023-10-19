@@ -7,6 +7,7 @@ Host *
 {% for h in hosts_csv.list %}
 Host {{ h.host_name }}
   Hostname {{ h.con_name }}
-  User {{ h.ssh_user }}
+  # User {{ h.ssh_user }}
+  User root
   IdentityFile {{ playbook_dir }}/.ssh/{{ h.host_name }}.id_rsa
 {% endfor %}
