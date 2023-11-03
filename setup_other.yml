@@ -1,5 +1,5 @@
 - hosts: all
-  gather_facts: true
+  gather_facts: false
   become: true
   become_method: sudo
   remote_user: ansible_user
